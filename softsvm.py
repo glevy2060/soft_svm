@@ -73,12 +73,11 @@ def simple_test():
     print(f"The {i}'th test sample was classified as {predicty}")
 
 
-def calc_errors(l, trainx, trainy, x, y):
+def calc_errors(l, trainx, trainy, x, y, n, m):
     ave_error = 0
     min_err = sys.maxsize
     max_err = 0
-    m = 100
-    for i in range(10):
+    for i in range(n):
         # Get a random m training examples from the training set
         indices = np.random.permutation(trainx.shape[0])
         _trainX = trainx[indices[:m]]
@@ -90,11 +89,11 @@ def calc_errors(l, trainx, trainy, x, y):
         min_err = min(min_err, err)
         max_err = max(max_err, err)
         ave_error += err
-    ave_error /= 10
+    ave_error /= n
     return ave_error, max_err, min_err
 
 
-def plt_error(err_test, min_test, max_test, err_train, min_train, max_train, nums):
+def plt_error_a(err_test, min_test, max_test, err_train, min_train, max_train, nums):
     err_train = np.asarray(err_train)
     min_train = np.asarray(min_train)
     max_train = np.asarray(max_train)
@@ -105,12 +104,26 @@ def plt_error(err_test, min_test, max_test, err_train, min_train, max_train, num
                  ecolor='cyan')
     plt.errorbar(nums, err_test, [err_test - min_test, max_test - err_test], fmt='ok', lw=1,
                  ecolor='blue')
-    plt.title("average test error")
+
+    plt.plot(nums, err_train)
+    plt.plot(nums, err_test)
+    plt.title("Average error")
     plt.xlabel("Power of 10")
     plt.ylabel("Average error")
     plt.legend(["Train Error", "Test Error"])
     plt.show()
 
+
+def plt_error_b(err_test, err_train, nums):
+    err_train = np.asarray(err_train)
+    err_test = np.asarray(err_test)
+    plt.plot(nums, err_train, "s")
+    plt.plot(nums, err_test, "s")
+    plt.title("Average error")
+    plt.xlabel("Power of 10")
+    plt.ylabel("Average error")
+    plt.legend(["Train Error", "Test Error"])
+    plt.show()
 
 def q2a():
     # load question 2 data
@@ -131,18 +144,40 @@ def q2a():
     max_errors_test = []
     for l in lamdas:
         # calculate test error
-        (err, max_err, min_err) = calc_errors(l, trainX, trainy, testX, testy)
+        (err, max_err, min_err) = calc_errors(l, trainX, trainy, testX, testy, 10, 100)
         errors_test.append(err)
         min_errors_test.append(min_err)
         max_errors_test.append(max_err)
         # calculate train error
-        (err, max_err, min_err) = calc_errors(l, trainX, trainy, trainX, trainy)
+        (err, max_err, min_err) = calc_errors(l, trainX, trainy, trainX, trainy, 10, 100)
         errors_train.append(err)
         min_errors_train.append(min_err)
         max_errors_train.append(max_err)
 
-    plt_error(errors_test, min_errors_test, max_errors_test, errors_train, min_errors_train, max_errors_train, nums)
+    plt_error_a(errors_test, min_errors_test, max_errors_test, errors_train, min_errors_train, max_errors_train, nums)
 
+def q2b():
+    data = np.load('ex2q2_mnist.npz')
+    trainX = data['Xtrain']
+    testX = data['Xtest']
+    trainy = data['Ytrain']
+    testy = data['Ytest']
+
+    # run the softsvm algorithm for 10**n
+    nums = [1, 3, 5, 8]
+    lamdas = np.asarray([10 ** n for n in nums], dtype='int64')
+    errors_train = []
+    errors_test = []
+    for l in lamdas:
+        # calculate test error
+        (err, max_err, min_err) = calc_errors(l, trainX, trainy, testX, testy, 1, 1000)
+        errors_test.append(err)
+
+        # calculate train error
+        (err, max_err, min_err) = calc_errors(l, trainX, trainy, trainX, trainy, 1, 1000)
+        errors_train.append(err)
+
+    plt_error_b(errors_train, errors_test, nums)
 
 
 if __name__ == '__main__':
@@ -154,7 +189,8 @@ if __name__ == '__main__':
     # test2 = np.asarray([3,4])
     # test = np.append([test] ,[test2], axis =0)
     # print(softsvm(l, x, y))
-    q2a()
+    # q2a()
+    q2b()
     # simple_test()
 
     # here you may add any code that uses the above functions to solve question 2
