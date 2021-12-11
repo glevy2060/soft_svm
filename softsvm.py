@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 
 
 # todo: complete the following functions, you may add auxiliary functions or define class to help you
+from matplotlib.transforms import ScaledTranslation
+
 
 def create_third_block(trainX, trainy):
     block_matrix = np.asarray([trainy[0] * trainX[0]])
@@ -100,10 +102,13 @@ def plt_error_a(err_test, min_test, max_test, err_train, min_train, max_train, n
     err_test = np.asarray(err_test)
     min_test = np.asarray(min_test)
     max_test = np.asarray(max_test)
-    plt.errorbar(nums, err_train, [err_train - min_train, max_train - err_train], fmt='ok', lw=1,
-                 ecolor='cyan')
-    plt.errorbar(nums, err_test, [err_test - min_test, max_test - err_test], fmt='ok', lw=1,
-                 ecolor='blue')
+    train, test = plt.subplots()
+    trans1 = test.transData + ScaledTranslation(-5 / 72, 0, train.dpi_scale_trans)
+    trans2 = test.transData + ScaledTranslation(+5 / 72, 0, train.dpi_scale_trans)
+    test.errorbar(nums, err_train, [err_train - min_train, max_train - err_train], fmt='ok', lw=1,
+                 linestyle="none", transform=trans1,ecolor='cyan')
+    test.errorbar(nums, err_test, [err_test - min_test, max_test - err_test], fmt='ok', lw=1,
+                 linestyle="none", transform=trans2, ecolor='blue')
 
     plt.plot(nums, err_train)
     plt.plot(nums, err_test)
@@ -189,8 +194,8 @@ if __name__ == '__main__':
     # test2 = np.asarray([3,4])
     # test = np.append([test] ,[test2], axis =0)
     # print(softsvm(l, x, y))
-    # q2a()
-    q2b()
+    q2a()
+    # q2b()
     # simple_test()
 
     # here you may add any code that uses the above functions to solve question 2
