@@ -41,6 +41,8 @@ def create_third_block(G, trainy):
 
 
 # todo: complete the following functions, you may add auxiliary functions or define class to help you
+
+
 def softsvmbf(l: float, sigma: float, trainX: np.array, trainy: np.array):
     G = rbf(sigma, trainX) #*m*m
     d = len(trainX[0]) #784
@@ -63,10 +65,14 @@ def softsvmbf(l: float, sigma: float, trainX: np.array, trainy: np.array):
     A = np.block([[np.zeros((m, m)), np.eye(m, m)], [third_block, np.eye(m, m)]])
     A = matrix(A)
 
-    sol = np.asarray(solvers.qp(H, u, -A, -v)["x"])
-    return sol[:784]
-
-    raise NotImplementedError()
+    alpha = np.asarray(solvers.qp(H, u, -A, -v)["x"])
+    alpha = alpha[:m]
+    # sol = np.asarray(solvers.qp(H, u, -A, -v)["x"])
+    # # sol = sol[:m]
+    # # w = np.zeros((1, m))
+    # # for i in range(m):
+    # #     w += sol[i] * G[i]
+    return alpha
 
 
 def simple_test():
@@ -92,12 +98,55 @@ def simple_test():
     assert w.shape[0] == m and w.shape[1] == 1, f"The shape of the output should be ({m}, 1)"
 
 
+def q4a():
+    data = np.load('EX2q4_data.npz')
+    trainX = data['Xtrain']
+    trainy = data['Ytrain']
+    plt.scatter(trainX.T[:1], trainX.T[1:], s=3, c=trainy)
+    plt.title("Training Points By Color")
+    plt.show()
+
+def calcErr():
+    #calc the sum in "the output of a kernel algorithm"
+
+def crossValidation(trainx, trainy, params, k):
+    s = zip(trainx, trainy)
+    si = np.split(s, k)
+    eAlpha = []
+    for p in params:
+        err = 0
+        for i in range(k):
+            v = s[i]
+            sTag = np.delete(si, i, 0).flatten() #create s'= s\si
+            sTagx= list(zip(*sTag))[0]
+            sTagy= list(zip(*sTag))[1]
+            hi = softsvmbf(p[0], p[1], sTagx, sTagy)
+            vx = np.asarray(zip(*v))[0]
+            vy = np.asarray(zip(*v))[1]
+            G = rbf(p[1], vx)
+            per = calcErr() #todo complete
+            err += np.mean(per != vy) / len(vx)
+        err /= k
+        eAlpha.append((err))
+
+    optimalAlpha = np.min(eAlpha)
+    softsvmbf(trainx, trainy, )
+
+
+def q4b():
+    lamda = np.asarray([1, 10, 100])
+    sigma = np.asarray([0.01, 0.5, 1])
+    params = zip(lamda, sigma)
+    data = np.load('EX2q4_data.npz')
+    trainX = data['Xtrain']
+    trainy = data['Ytrain']
+    sol = []
+    crossValidation(trainX, trainy, params, 5)
 
 if __name__ == '__main__':
     # before submitting, make sure that the function simple_test runs without errors
     simple_test()
-    # x = np.asarray([[1],[2],[3]])
-    # sigma = 2
-    # rbf(sigma, x)
+    q4a()
+    q4b()
 
     # here you may add any code that uses the above functions to solve question 4

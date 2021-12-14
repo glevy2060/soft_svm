@@ -161,6 +161,7 @@ def q2a():
 
     plt_error_a(errors_test, min_errors_test, max_errors_test, errors_train, min_errors_train, max_errors_train, nums)
 
+
 def q2b():
     data = np.load('ex2q2_mnist.npz')
     trainX = data['Xtrain']
@@ -186,16 +187,8 @@ def q2b():
 
 
 if __name__ == '__main__':
-    # before submitting, make sure that the function simple_test runs without errors
-    # x = np.asarray([[1],[2],[3]])
-    # y = np.asarray([0,1,1])
-    # l = 4
-    # test = np.asarray([1,2])
-    # test2 = np.asarray([3,4])
-    # test = np.append([test] ,[test2], axis =0)
-    # print(softsvm(l, x, y))
     q2a()
-    # q2b()
-    # simple_test()
+    q2b()
+    simple_test()
 
     # here you may add any code that uses the above functions to solve question 2
