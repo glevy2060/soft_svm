@@ -4,6 +4,9 @@ import numpy as np
 from cvxopt import solvers, matrix, spmatrix, spdiag, sparse
 import matplotlib.pyplot as plt
 
+from softsvm import softsvm
+
+
 def calc_k(xi, xj, sigma):
     xij = xi-xj
     norm = np.linalg.norm(xij)
@@ -13,16 +16,13 @@ def calc_k(xi, xj, sigma):
 
 
 def rbf(sigma: float, trainX: np.array):
-    G = np.asarray([[]])
-    for i in range(len(trainX)):
+    m = len(trainX)
+    G = np.zeros((m,m))
+    for i in range(m):
         curr = []
-        for j in range(len(trainX)):
-            curr.append(calc_k(trainX[i], trainX[j], sigma))
-        curr = np.asarray(curr)
-        if i == 0:
-            G = [curr]
-        else:
-            G = np.append(G, [curr], axis=0)
+        for j in range(i,m):
+            G[i][j] = calc_k(trainX[i], trainX[j], sigma)
+            G[j][i] = G[i][j]
     return G
 
 
@@ -62,6 +62,7 @@ def softsvmbf(l: float, sigma: float, trainX: np.array, trainy: np.array):
 
     # create A
     third_block = create_third_block(G, trainy)
+    third_block = third_block.reshape(len(third_block), len(third_block))
     A = np.block([[np.zeros((m, m)), np.eye(m, m)], [third_block, np.eye(m, m)]])
     A = matrix(A)
 
@@ -75,6 +76,8 @@ def softsvmbfWithG(l: float, sigma: float, trainX: np.array, trainy: np.array, G
 
     # create H
     H = np.block([[2*l*G, np.zeros((m, m))], [np.zeros((m, m)), np.zeros((m, m))]])
+    diag = 10**-6*np.eye(2*m)
+    H = H + diag
     H = matrix(H)
 
     # create u
@@ -127,19 +130,61 @@ def q4a():
     plt.show()
 
 
-def cross_validation(trainx, trainy, params, k):
+def get_labels(sTagX, VX, alpha, sigma):
+    m = len(alpha)
+    yPred = np.zeros((len(VX), 1))
+    for i in range(len(VX)): #400
+        Xs = np.zeros((1, m))
+        for j in range(m): #1600
+            Xs[0][j] = calc_k(sTagX[j], VX[i], sigma)
+        yPred[i] = np.sign(Xs @ alpha)
+    return yPred
+
+def cross_validation_kernel(trainx, trainy, params, k):
     s = np.asarray(list(zip(trainx, trainy)))
     si = np.split(s, k)
-    for j in range (len(params)):  # params[lambda, sigma]
+    errors = []
+    for j in range (len(params)): # params[lambda, sigma]
+        err = 0
         for i in range(k):
             v = si[i]  # chosen set
             sTag = np.delete(si, i, 0)  # create s'= s\si = 4 groups in size 400*2
             sTagx = sTag.reshape(1600, 2)[:, 0]  # take only X
             sTagy = sTag.reshape(1600, 2)[:, 1]  # take only Y
             G = rbf(params[j][1], sTagx)
-            hi = softsvmbfWithG(params[j][0], params[j][1], sTagx, sTagy, G)
+            alpha = softsvmbfWithG(params[j][0], params[j][1], sTagx, sTagy, G)
             vx = v[:, 0]
             vy = v[:, 1]
+            yPred = get_labels(sTagx, vx, alpha, params[j][1])
+            err  += (np.mean(yPred != vy)) ##shape without reshape
+        err /= k
+        errors.append(err)
+    index_min = np.argmin(errors)
+    best_param = params[index_min]
+    alpha = softsvmbf(best_param[0], best_param[1], trainx, trainy)
+    return alpha
+
+def cross_validation(trainx, trainy, lamda, k):
+    s = np.asarray(list(zip(trainx, trainy)))
+    si = np.split(s, k)
+    errors = []
+    for j in range (len(lamda)): # params[lambda, sigma]
+        err = 0
+        for i in range(k):
+            v = si[i]  # chosen set
+            sTag = np.delete(si, i, 0)  # create s'= s\si = 4 groups in size 400*2
+            sTagx = sTag.reshape(1600, 2)[:, 0]  # take only X
+            sTagy = sTag.reshape(1600, 2)[:, 1]  # take only Y
+            w = softsvm(lamda[j], sTagx, sTagy)
+            vx = v[:, 0]
+            vy = v[:, 1]
+            err += (np.mean(np.sign(vx @ w).flatten() != vy)) ##shape without reshape
+        err /= k
+        errors.append(err)
+    index_min = np.argmin(errors)
+    best_param = lamda[index_min]
+    alpha = softsvm(best_param, trainx, trainy)
+    return alpha
 
 
 def q4b():
@@ -150,7 +195,8 @@ def q4b():
     trainX = data['Xtrain']
     trainy = data['Ytrain']
     sol = []
-    cross_validation(trainX, trainy, params, 5)
+    cross_validation_kernel(trainX, trainy, params, 5)
+    cross_validation(trainX, trainy, lamda, 5)
 
 
 if __name__ == '__main__':
