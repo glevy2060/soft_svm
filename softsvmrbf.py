@@ -50,6 +50,8 @@ def softsvmbf(l: float, sigma: float, trainX: np.array, trainy: np.array):
 
     # create H
     H = np.block([[2*l*G, np.zeros((m, m))], [np.zeros((m, m)), np.zeros((m, m))]])
+    diag = 10**-5*np.eye(2*m)
+    H = H + diag
     H = matrix(H)
 
     # create u
@@ -76,7 +78,7 @@ def softsvmbfWithG(l: float, sigma: float, trainX: np.array, trainy: np.array, G
 
     # create H
     H = np.block([[2*l*G, np.zeros((m, m))], [np.zeros((m, m)), np.zeros((m, m))]])
-    diag = 10**-6*np.eye(2*m)
+    diag = 10**-5*np.eye(2*m)
     H = H + diag
     H = matrix(H)
 
@@ -156,7 +158,7 @@ def cross_validation_kernel(trainx, trainy, params, k):
             vx = v[:, 0]
             vy = v[:, 1]
             yPred = get_labels(sTagx, vx, alpha, params[j][1])
-            err  += (np.mean(yPred != vy)) ##shape without reshape
+            err  += (np.mean(yPred.flatten() != vy)) ##shape without reshape
         err /= k
         errors.append(err)
     index_min = np.argmin(errors)
@@ -190,7 +192,14 @@ def cross_validation(trainx, trainy, lamda, k):
 def q4b():
     lamda = np.asarray([1, 10, 100])
     sigma = np.asarray([0.01, 0.5, 1])
-    params = np.asarray(list(zip(lamda, sigma)))
+    params = np.zeros((9,2))
+    counter = 0
+    for i in range(3):
+        for j in range(3):
+            params[counter][0] = lamda[i]
+            params[counter][1] = sigma[j]
+            counter += 1
+
     data = np.load('EX2q4_data.npz')
     trainX = data['Xtrain']
     trainy = data['Ytrain']
