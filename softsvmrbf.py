@@ -158,7 +158,7 @@ def cross_validation_kernel(trainx, trainy, params, k):
             vx = v[:, 0]
             vy = v[:, 1]
             yPred = get_labels(sTagx, vx, alpha, params[j][1])
-            err  += (np.mean(yPred.flatten() != vy)) ##shape without reshape
+            err += (np.mean(yPred.flatten() != vy)) ##shape without reshape
         err /= k
         errors.append(err)
     index_min = np.argmin(errors)
@@ -187,7 +187,7 @@ def cross_validation(trainx, trainy, lamda, k):
     best_param = lamda[index_min]
     w = softsvm(best_param, trainx, trainy)
     best_error = (np.mean(np.sign(trainx @ w) != trainy))
-    return best_error
+    print(f"Error for lamda = {best_param} on S is: {best_error}")
 
 
 def q4b():
@@ -204,8 +204,7 @@ def q4b():
     data = np.load('EX2q4_data.npz')
     trainX = data['Xtrain']
     trainy = data['Ytrain']
-    sol = []
-    #cross_validation_kernel(trainX, trainy, params, 5)
+    cross_validation_kernel(trainX, trainy, params, 5)
     cross_validation(trainX, trainy, lamda, 5)
 
 
