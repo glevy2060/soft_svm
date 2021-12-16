@@ -41,7 +41,7 @@ def softsvm(l, trainX: np.array, trainy: np.array):
     A = matrix(A)
 
     sol = np.asarray(solvers.qp(H, u, -A, -v)["x"])
-    return sol[:784]
+    return sol[:d]
 
 
 def simple_test():
@@ -187,8 +187,8 @@ def q2b():
 
 
 if __name__ == '__main__':
+    simple_test()
     q2a()
     q2b()
-    simple_test()
 
     # here you may add any code that uses the above functions to solve question 2

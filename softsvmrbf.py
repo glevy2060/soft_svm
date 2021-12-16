@@ -167,26 +167,27 @@ def cross_validation_kernel(trainx, trainy, params, k):
     return alpha
 
 def cross_validation(trainx, trainy, lamda, k):
-    s = np.asarray(list(zip(trainx, trainy)))
-    si = np.split(s, k)
+    xi = np.split(trainx, k)
+    yi = np.split(trainy, k)
     errors = []
     for j in range (len(lamda)): # params[lambda, sigma]
         err = 0
         for i in range(k):
-            v = si[i]  # chosen set
-            sTag = np.delete(si, i, 0)  # create s'= s\si = 4 groups in size 400*2
-            sTagx = sTag.reshape(1600, 2)[:, 0]  # take only X
-            sTagy = sTag.reshape(1600, 2)[:, 1]  # take only Y
-            w = softsvm(lamda[j], sTagx, sTagy)
-            vx = v[:, 0]
-            vy = v[:, 1]
-            err += (np.mean(np.sign(vx @ w).flatten() != vy)) ##shape without reshape
+            vx = xi[i]
+            vy = yi[i]
+            sxTag = np.delete(xi, i, 0)
+            sxTag = np.reshape(sxTag, (1600,2))
+            syTag = np.delete(yi, i, 0)
+            syTag = np.reshape(syTag, (1600,1))
+            w = softsvm(lamda[j], sxTag, syTag)
+            err += (np.mean(np.sign(vx @ w) != vy)) ##shape without reshape
         err /= k
         errors.append(err)
     index_min = np.argmin(errors)
     best_param = lamda[index_min]
-    alpha = softsvm(best_param, trainx, trainy)
-    return alpha
+    w = softsvm(best_param, trainx, trainy)
+    best_error = (np.mean(np.sign(trainx @ w) != trainy))
+    return best_error
 
 
 def q4b():
@@ -204,7 +205,7 @@ def q4b():
     trainX = data['Xtrain']
     trainy = data['Ytrain']
     sol = []
-    cross_validation_kernel(trainX, trainy, params, 5)
+    #cross_validation_kernel(trainX, trainy, params, 5)
     cross_validation(trainX, trainy, lamda, 5)
 
 
