@@ -209,26 +209,48 @@ def q4b():
     cross_validation_kernel(trainX, trainy, params, 5)
     cross_validation(trainX, trainy, lamda, 5)
 
+
 def q4d():
     data = np.load('EX2q4_data.npz')
     trainX = data['Xtrain']
     trainy = data['Ytrain']
     lamda = 100
     sigmas = np.asarray([0.01, 0.5, 1])
-    ypreds =
 
-    for sigma in range(sigmas):
+    # define the lower and upper limits for x and y
+    minX, maxX, minY, maxY = -10, 10, -10, 10
+    # create one-dimensional arrays for x and y
+    x = np.linspace(minX, maxX, 40)
+    y = np.linspace(minY, maxY, 40)
+    # create the mesh based on these arrays
+    X, Y = np.meshgrid(x, y)
+    testX= []
+    for i in range(len(X)):
+        for j in range(len(X)):
+            coor = [X[i][j], Y[i][j]]
+            testX.append(coor)
+    testX = np.asarray(testX)
+
+    for sigma in sigmas:
         alpha = softsvmbf(lamda, sigma, trainX, trainy)
+        ypred = get_labels(trainX, testX, alpha, sigma).flatten()
+        for i in range(len(ypred)):
+            if ypred[i] == 0:
+                ypred[i] = 1
+            if ypred[i] == -1:
+                ypred[i] = 0
+        ypred = np.reshape(ypred, (40, 40))
+        extent = [-10., 10., -10., 10.]
+        plt.imshow(ypred, extent= extent)
+        plt.title(f"sigma = {sigma}")
+        plt.show()
 
-
-
-    print("hi")
 
 if __name__ == '__main__':
     # before submitting, make sure that the function simple_test runs without errors
     # simple_test()
     # q4a()
-    q4b()
+    # q4b()
     q4d()
 
     # here you may add any code that uses the above functions to solve question 4
