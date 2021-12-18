@@ -164,7 +164,9 @@ def cross_validation_kernel(trainx, trainy, params, k):
     index_min = np.argmin(errors)
     best_param = params[index_min]
     alpha = softsvmbf(best_param[0], best_param[1], trainx, trainy)
-    return alpha
+    yPred_trainx = get_labels(trainx, trainx, alpha, best_param[1])
+    final_err = (np.mean(yPred_trainx != trainy))  ##shape without reshape
+    return final_err
 
 def cross_validation(trainx, trainy, lamda, k):
     xi = np.split(trainx, k)
@@ -207,11 +209,26 @@ def q4b():
     cross_validation_kernel(trainX, trainy, params, 5)
     cross_validation(trainX, trainy, lamda, 5)
 
+def q4d():
+    data = np.load('EX2q4_data.npz')
+    trainX = data['Xtrain']
+    trainy = data['Ytrain']
+    lamda = 100
+    sigmas = np.asarray([0.01, 0.5, 1])
+    ypreds =
+
+    for sigma in range(sigmas):
+        alpha = softsvmbf(lamda, sigma, trainX, trainy)
+
+
+
+    print("hi")
 
 if __name__ == '__main__':
     # before submitting, make sure that the function simple_test runs without errors
     # simple_test()
     # q4a()
     q4b()
+    q4d()
 
     # here you may add any code that uses the above functions to solve question 4
