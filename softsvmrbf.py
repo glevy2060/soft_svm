@@ -40,7 +40,7 @@ def create_third_block(G, trainy):
     return block_matrix
 
 
-def softsvmbf(l: float, sigma: float, trainX: np.array, trainy: np.array):
+def softsvmrbf(l: float, sigma: float, trainX: np.array, trainy: np.array):
     G = rbf(sigma, trainX) #*m*m
     d = len(trainX[0]) #784
     m = len(trainX)
@@ -115,7 +115,7 @@ def simple_test():
     _trainy = trainy[indices[:m]]
 
     # run the softsvm algorithm
-    w = softsvmbf(10, 0.1, _trainX, _trainy)
+    w = softsvmrbf(10, 0.1, _trainX, _trainy)
 
     # tests to make sure the output is of the intended class and shape
     assert isinstance(w, np.ndarray), "The output of the function softsvmbf should be a numpy array"
@@ -163,7 +163,7 @@ def cross_validation_kernel(trainx, trainy, params, k):
         errors.append(err)
     index_min = np.argmin(errors)
     best_param = params[index_min]
-    alpha = softsvmbf(best_param[0], best_param[1], trainx, trainy)
+    alpha = softsvmrbf(best_param[0], best_param[1], trainx, trainy)
     yPred_trainx = get_labels(trainx, trainx, alpha, best_param[1])
     final_err = (np.mean(yPred_trainx != trainy))  ##shape without reshape
     return final_err
@@ -231,7 +231,7 @@ def q4d():
     testX = np.asarray(testX)
 
     for sigma in sigmas:
-        alpha = softsvmbf(lamda, sigma, trainX, trainy)
+        alpha = softsvmrbf(lamda, sigma, trainX, trainy)
         ypred = get_labels(trainX, testX, alpha, sigma).flatten()
         for i in range(len(ypred)):
             if ypred[i] == 0:
