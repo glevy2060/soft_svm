@@ -40,10 +40,7 @@ def create_third_block(G, trainy):
     return block_matrix
 
 
-# todo: complete the following functions, you may add auxiliary functions or define class to help you
-
-
-def softsvmbf(l: float, sigma: float, trainX: np.array, trainy: np.array):
+def softsvmrbf(l: float, sigma: float, trainX: np.array, trainy: np.array):
     G = rbf(sigma, trainX) #*m*m
     d = len(trainX[0]) #784
     m = len(trainX)
@@ -71,6 +68,7 @@ def softsvmbf(l: float, sigma: float, trainX: np.array, trainy: np.array):
     alpha = np.asarray(solvers.qp(H, u, -A, -v)["x"])
     alpha = alpha[:m]
     return alpha
+
 
 def softsvmbfWithG(l: float, sigma: float, trainX: np.array, trainy: np.array, G):
     d = len(trainX[0]) #784
@@ -100,6 +98,7 @@ def softsvmbfWithG(l: float, sigma: float, trainX: np.array, trainy: np.array, G
     alpha = alpha[:m]
     return alpha
 
+
 def simple_test():
     # load question 2 data
     data = np.load('EX2q2_mnist.npz')
@@ -116,7 +115,7 @@ def simple_test():
     _trainy = trainy[indices[:m]]
 
     # run the softsvm algorithm
-    w = softsvmbf(10, 0.1, _trainX, _trainy)
+    w = softsvmrbf(10, 0.1, _trainX, _trainy)
 
     # tests to make sure the output is of the intended class and shape
     assert isinstance(w, np.ndarray), "The output of the function softsvmbf should be a numpy array"
@@ -142,6 +141,7 @@ def get_labels(sTagX, VX, alpha, sigma):
         yPred[i] = np.sign(Xs @ alpha)
     return yPred
 
+
 def cross_validation_kernel(trainx, trainy, params, k):
     s = np.asarray(list(zip(trainx, trainy)))
     si = np.split(s, k)
@@ -163,7 +163,7 @@ def cross_validation_kernel(trainx, trainy, params, k):
         errors.append(err)
     index_min = np.argmin(errors)
     best_param = params[index_min]
-    alpha = softsvmbf(best_param[0], best_param[1], trainx, trainy)
+    alpha = softsvmrbf(best_param[0], best_param[1], trainx, trainy)
     yPred_trainx = get_labels(trainx, trainx, alpha, best_param[1])
     final_err = (np.mean(yPred_trainx != trainy))  ##shape without reshape
     return final_err
@@ -216,7 +216,6 @@ def q4d():
     trainy = data['Ytrain']
     lamda = 100
     sigmas = np.asarray([0.01, 0.5, 1])
-
     # define the lower and upper limits for x and y
     minX, maxX, minY, maxY = -10, 10, -10, 10
     # create one-dimensional arrays for x and y
@@ -232,7 +231,7 @@ def q4d():
     testX = np.asarray(testX)
 
     for sigma in sigmas:
-        alpha = softsvmbf(lamda, sigma, trainX, trainy)
+        alpha = softsvmrbf(lamda, sigma, trainX, trainy)
         ypred = get_labels(trainX, testX, alpha, sigma).flatten()
         for i in range(len(ypred)):
             if ypred[i] == 0:
@@ -247,10 +246,9 @@ def q4d():
 
 
 if __name__ == '__main__':
-    # before submitting, make sure that the function simple_test runs without errors
-    # simple_test()
-    # q4a()
-    # q4b()
+    simple_test()
+    q4a()
+    q4b()
     q4d()
 
     # here you may add any code that uses the above functions to solve question 4
