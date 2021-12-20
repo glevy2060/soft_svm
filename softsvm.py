@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib.transforms import ScaledTranslation
 
 
-def create_third_block(trainX, trainy):
+def  create_third_block(trainX, trainy):
     block_matrix = np.asarray([trainy[0] * trainX[0]])
     for i in range(1, len(trainy)):
         vector = trainy[i] * trainX[i]
@@ -95,7 +95,7 @@ def calc_errors(l, trainx, trainy, x, y, n, m):
     return ave_error, max_err, min_err
 
 
-def plt_error_a(err_test, min_test, max_test, err_train, min_train, max_train, nums):
+def plt_error(err_test, min_test, max_test, err_train, min_train, max_train, err_trainb, err_testb, nums):
     err_train = np.asarray(err_train)
     min_train = np.asarray(min_train)
     max_train = np.asarray(max_train)
@@ -112,6 +112,11 @@ def plt_error_a(err_test, min_test, max_test, err_train, min_train, max_train, n
 
     plt.plot(nums, err_train)
     plt.plot(nums, err_test)
+    err_trainb = np.asarray(err_trainb)
+    err_testb = np.asarray(err_testb)
+    numsb = [1, 3, 5, 8]
+    plt.plot(numsb, err_trainb, "s")
+    plt.plot(numsb, err_testb, "s")
     plt.title("Average error")
     plt.xlabel("Power of 10")
     plt.ylabel("Average error")
@@ -159,7 +164,7 @@ def q2a():
         min_errors_train.append(min_err)
         max_errors_train.append(max_err)
 
-    plt_error_a(errors_test, min_errors_test, max_errors_test, errors_train, min_errors_train, max_errors_train, nums)
+    return errors_test, min_errors_test, max_errors_test, errors_train, min_errors_train, max_errors_train
 
 
 def q2b():
@@ -183,12 +188,15 @@ def q2b():
         (err, max_err, min_err) = calc_errors(l, trainX, trainy, trainX, trainy, 1, 1000)
         errors_train.append(err)
 
-    plt_error_b(errors_train, errors_test, nums)
+    return errors_train, errors_test
+    # plt_error_b(errors_train, errors_test, nums)
 
 
 if __name__ == '__main__':
     simple_test()
-    q2a()
-    q2b()
+    errors_testa, min_errors_test, max_errors_test, errors_traina, min_errors_train, max_errors_train = q2a()
+    (errors_train, errors_test) = q2b()
+    nums = np.arange(1,11)
+    plt_error(errors_testa, min_errors_test, max_errors_test, errors_traina, min_errors_train, max_errors_train, errors_train, errors_test, nums)
 
     # here you may add any code that uses the above functions to solve question 2
