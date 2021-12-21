@@ -124,17 +124,6 @@ def plt_error(err_test, min_test, max_test, err_train, min_train, max_train, err
     plt.show()
 
 
-def plt_error_b(err_test, err_train, nums):
-    err_train = np.asarray(err_train)
-    err_test = np.asarray(err_test)
-    plt.plot(nums, err_train, "s")
-    plt.plot(nums, err_test, "s")
-    plt.title("Average error")
-    plt.xlabel("Power of 10")
-    plt.ylabel("Average error")
-    plt.legend(["Train Error", "Test Error"])
-    plt.show()
-
 def q2a():
     # load question 2 data
     data = np.load('ex2q2_mnist.npz')
@@ -188,15 +177,19 @@ def q2b():
         (err, max_err, min_err) = calc_errors(l, trainX, trainy, trainX, trainy, 1, 1000)
         errors_train.append(err)
 
+    errors_testa, min_errors_test, max_errors_test, errors_traina, min_errors_train, max_errors_train = q2a()
+    plt_error(errors_testa,
+              min_errors_test,
+              max_errors_test,
+              errors_traina,
+              min_errors_train,
+              max_errors_train,
+              errors_train,
+              errors_test, np.arange(1,11))
     return errors_train, errors_test
-    # plt_error_b(errors_train, errors_test, nums)
 
 
 if __name__ == '__main__':
     simple_test()
-    errors_testa, min_errors_test, max_errors_test, errors_traina, min_errors_train, max_errors_train = q2a()
-    (errors_train, errors_test) = q2b()
-    nums = np.arange(1,11)
-    plt_error(errors_testa, min_errors_test, max_errors_test, errors_traina, min_errors_train, max_errors_train, errors_train, errors_test, nums)
-
-    # here you may add any code that uses the above functions to solve question 2
+    q2a()
+    q2b()
